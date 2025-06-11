@@ -23,7 +23,7 @@ import Spinner from '../components/Spinner';
 
 export default function LobbyScreen() {
   const navigation = useNavigation();
-  const { getTranslation } = useLanguage();
+  const { getTranslation, language } = useLanguage();
   const {
     playerName,
     roomCode,
@@ -32,6 +32,7 @@ export default function LobbyScreen() {
     setPlayers,
     myId,
     setMyId,
+    wordLength,
     setWordLength,
     setRound,
     resetGameState,
@@ -43,6 +44,8 @@ export default function LobbyScreen() {
   
   const [isCreatingRoom, setIsCreatingRoom] = useState(false);
   const [inputRoomCode, setInputRoomCode] = useState('');
+  const [showWordLengthSelection, setShowWordLengthSelection] = useState(false);
+  const [selectedWordLength, setSelectedWordLength] = useState(5);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -118,6 +121,11 @@ export default function LobbyScreen() {
         console.log('Two players in room, game will start automatically');
       }
     }
+    
+    // Update word length if provided
+    if (data.wordLength) {
+      setWordLength(data.wordLength);
+    }
   };
 
   // Player joined is handled via roomUpdate
@@ -146,15 +154,21 @@ export default function LobbyScreen() {
     setInputRoomCode('');
     const socket = global.socketInstance;
     if (socket && socket.connected) {
-      console.log('Emitting create-room with playerName:', playerName);
-      socket.emit('createRoom', { playerName }, (response) => {
+      console.log('Emitting create-room with playerName:', playerName, 'wordLength:', selectedWordLength, 'language:', language);
+      socket.emit('createRoom', { 
+        playerName, 
+        wordLength: selectedWordLength,
+        language: language 
+      }, (response) => {
         console.log('Create room response:', response);
         if (response && response.success) {
           console.log('Room created successfully with roomCode:', response.roomCode);
           // Immediately update state from callback
           setRoomCode(response.roomCode);
+          setWordLength(response.wordLength || selectedWordLength);
           setIsCreatingRoom(true);
           setIsLoading(false);
+          setShowWordLengthSelection(false);
           // Also create initial player
           setPlayers([{ id: socket.id, name: playerName, score: 0 }]);
         } else {
@@ -202,6 +216,7 @@ export default function LobbyScreen() {
           // Immediately update state from callback
           setRoomCode(response.roomCode);
           setPlayers(response.players || []);
+          setWordLength(response.wordLength || 5); // Set word length from room
           setIsCreatingRoom(false);
           setIsLoading(false);
         } else {
@@ -295,12 +310,62 @@ export default function LobbyScreen() {
               </View>
 
               <View style={commonStyles.centerContainer}>
-                {!roomCode ? (
+                {showWordLengthSelection ? (
+                  // Word Length Selection
+                  <View style={styles.wordLengthContainer}>
+                    <TouchableOpacity
+                      style={styles.backButtonSmall}
+                      onPress={() => setShowWordLengthSelection(false)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="arrow-back" size={24} color={COLORS.text.primary} />
+                    </TouchableOpacity>
+                    
+                    <Text style={styles.wordLengthTitle}>{getTranslation('selectWordLength')}</Text>
+                    <Text style={styles.wordLengthSubtitle}>{getTranslation('chooseWordLengthDesc')}</Text>
+                    
+                    <View style={styles.wordLengthOptions}>
+                      {[3, 4, 5, 6].map((length) => (
+                        <TouchableOpacity
+                          key={length}
+                          style={[
+                            styles.wordLengthOption,
+                            selectedWordLength === length && styles.wordLengthOptionSelected
+                          ]}
+                          onPress={() => setSelectedWordLength(length)}
+                          activeOpacity={0.8}
+                        >
+                          <Text style={[
+                            styles.wordLengthOptionText,
+                            selectedWordLength === length && styles.wordLengthOptionTextSelected
+                          ]}>
+                            {length} {getTranslation('letters')}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    
+                    <TouchableOpacity
+                      style={styles.confirmButton}
+                      onPress={createRoom}
+                      activeOpacity={0.8}
+                    >
+                      <LinearGradient
+                        colors={COLORS.gradient.primary}
+                        style={styles.gradientButton}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                      >
+                        <Text style={styles.confirmButtonText}>{getTranslation('createRoom')}</Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  </View>
+                ) : !roomCode ? (
                   // Create or Join Room
                   <View style={styles.optionsContainer}>
                     <TouchableOpacity
                       style={styles.optionCard}
-                      onPress={createRoom}
+                      onPress={() => setShowWordLengthSelection(true)}
                       activeOpacity={0.8}
                     >
                       <LinearGradient
@@ -377,6 +442,11 @@ export default function LobbyScreen() {
                         </View>
                       </View>
                       <Text style={styles.shareHint}>{getTranslation('shareRoomCode')}</Text>
+                      
+                      <View style={styles.wordLengthInfo}>
+                        <Text style={styles.wordLengthLabel}>{getTranslation('wordLength')}: </Text>
+                        <Text style={styles.wordLengthValue}>{wordLength} {getTranslation('letters')}</Text>
+                      </View>
                     </View>
 
                     <View style={styles.playersCard}>
@@ -684,5 +754,101 @@ const styles = {
     fontWeight: '600',
     color: COLORS.success,
     marginTop: 8,
+  },
+  
+  wordLengthContainer: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  
+  backButtonSmall: {
+    alignSelf: 'flex-start',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+  },
+  
+  wordLengthTitle: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text.primary,
+    marginBottom: 8,
+  },
+  
+  wordLengthSubtitle: {
+    fontSize: 16,
+    color: COLORS.text.secondary,
+    marginBottom: 32,
+    textAlign: 'center',
+  },
+  
+  wordLengthOptions: {
+    width: '100%',
+    marginBottom: 32,
+  },
+  
+  wordLengthOption: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: COLORS.border.default,
+  },
+  
+  wordLengthOptionSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.surface,
+  },
+  
+  wordLengthOptionText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: COLORS.text.primary,
+    textAlign: 'center',
+  },
+  
+  wordLengthOptionTextSelected: {
+    color: COLORS.primary,
+  },
+  
+  confirmButton: {
+    width: '100%',
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  
+  confirmButtonText: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: COLORS.text.light,
+    letterSpacing: 0.5,
+  },
+  
+  wordLengthInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border.default,
+  },
+  
+  wordLengthLabel: {
+    fontSize: 14,
+    color: COLORS.text.muted,
+  },
+  
+  wordLengthValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text.primary,
   },
 };

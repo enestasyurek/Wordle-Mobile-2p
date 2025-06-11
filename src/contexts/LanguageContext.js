@@ -5,7 +5,7 @@ const LanguageContext = createContext();
 
 const translations = {
   tr: {
-    appName: 'Kelime Savaşı',
+    appName: 'Wordle TR',
     singlePlayer: 'Tek Kişilik',
     twoPlayer: '2 Kişilik',
     howToPlay: 'Nasıl Oynanır?',
@@ -46,6 +46,8 @@ const translations = {
     copyRoomCode: 'Oda kodunu kopyala',
     copiedToClipboard: 'Panoya kopyalandı!',
     selectWordLength: 'Kelime uzunluğu seçin',
+    chooseWordLengthDesc: 'Oda için kelime uzunluğunu seçin',
+    wordLength: 'Kelime Uzunluğu',
     letters: 'harf',
     '3letters': '3 Harf',
     '4letters': '4 Harf',
@@ -171,6 +173,8 @@ const translations = {
     copyRoomCode: 'Copy room code',
     copiedToClipboard: 'Copied to clipboard!',
     selectWordLength: 'Select word length',
+    chooseWordLengthDesc: 'Choose word length for the room',
+    wordLength: 'Word Length',
     letters: 'letters',
     '3letters': '3 Letters',
     '4letters': '4 Letters',
