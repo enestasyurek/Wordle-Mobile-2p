@@ -26,7 +26,7 @@ const { width: screenWidth } = Dimensions.get('window');
 export default function HomeScreen() {
   const navigation = useNavigation();
   const { language, setLanguage, getTranslation } = useLanguage();
-  const { playerName, setPlayerName, setSinglePlayerMode, setGameState, showNotification } = useGame();
+  const { playerName, setPlayerName, setSinglePlayerMode, setGameState, showNotification, roomCode, resetGameState } = useGame();
   const { isConnected } = useSocket();
   const [nameInput, setNameInput] = useState(playerName);
   const [isFocused, setIsFocused] = useState(false);
@@ -37,6 +37,13 @@ export default function HomeScreen() {
   const buttonScale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
+    // Clean up any existing room connection when arriving at home screen
+    const socket = global.socketInstance;
+    if (socket && roomCode) {
+      socket.emit('leaveRoom', { roomCode });
+      resetGameState(true);
+    }
+    
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,

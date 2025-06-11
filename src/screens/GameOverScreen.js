@@ -105,7 +105,7 @@ export default function GameOverScreen() {
     if (socket && roomCode && !singlePlayerMode) {
       socket.emit('leaveRoom', { roomCode });
     }
-    resetGameState();
+    resetGameState(true); // Full reset
     setGameState('home');
     navigation.replace('Home');
   };

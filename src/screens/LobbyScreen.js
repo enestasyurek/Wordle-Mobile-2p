@@ -101,6 +101,9 @@ export default function LobbyScreen() {
       const socket = global.socketInstance;
       if (socket && roomCode) {
         socket.emit('leaveRoom', { roomCode });
+        // Clear room code when leaving
+        setRoomCode('');
+        setPlayers([]);
       }
     };
   }, [roomCode]);
@@ -137,7 +140,10 @@ export default function LobbyScreen() {
   const createRoom = () => {
     console.log('Creating room...');
     setIsLoading(true);
-    resetGameState();
+    // Clear previous room data before creating new room
+    setRoomCode('');
+    setPlayers([]);
+    setInputRoomCode('');
     const socket = global.socketInstance;
     if (socket && socket.connected) {
       console.log('Emitting create-room with playerName:', playerName);
@@ -180,7 +186,9 @@ export default function LobbyScreen() {
     
     console.log('Joining room...');
     setIsLoading(true);
-    resetGameState();
+    // Clear previous room data before joining new room
+    setRoomCode('');
+    setPlayers([]);
     const socket = global.socketInstance;
     if (socket && socket.connected) {
       console.log('Emitting join-room with roomCode:', inputRoomCode.toUpperCase(), 'playerName:', playerName);
