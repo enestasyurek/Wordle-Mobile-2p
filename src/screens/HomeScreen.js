@@ -20,6 +20,7 @@ import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useAuth } from '../contexts/AuthContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ export default function HomeScreen() {
   const { language, setLanguage, getTranslation } = useLanguage();
   const { playerName, setPlayerName, setSinglePlayerMode, setGameState, showNotification, roomCode, resetGameState } = useGame();
   const { isConnected } = useSocket();
+  const { user, isAuthenticated } = useAuth();
   const [nameInput, setNameInput] = useState(playerName);
   const [isFocused, setIsFocused] = useState(false);
   
@@ -144,16 +146,36 @@ export default function HomeScreen() {
                     <Ionicons name="settings-outline" size={24} color={COLORS.text.primary} />
                   </TouchableOpacity>
                   
-                  <TouchableOpacity
-                    style={styles.topButton}
-                    onPress={toggleLanguage}
-                    activeOpacity={0.7}
-                  >
-                    <View style={styles.languageButtonContent}>
-                      <Text style={styles.languageEmoji}>{language === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
-                      <Ionicons name="language" size={20} color={COLORS.primary} />
-                    </View>
-                  </TouchableOpacity>
+                  <View style={styles.rightButtons}>
+                    {isAuthenticated ? (
+                      <TouchableOpacity
+                        style={styles.topButton}
+                        onPress={() => navigation.navigate('Profile')}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="person-outline" size={24} color={COLORS.primary} />
+                      </TouchableOpacity>
+                    ) : (
+                      <TouchableOpacity
+                        style={styles.topButton}
+                        onPress={() => navigation.navigate('Login')}
+                        activeOpacity={0.7}
+                      >
+                        <Ionicons name="log-in-outline" size={24} color={COLORS.primary} />
+                      </TouchableOpacity>
+                    )}
+                    
+                    <TouchableOpacity
+                      style={styles.topButton}
+                      onPress={toggleLanguage}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.languageButtonContent}>
+                        <Text style={styles.languageEmoji}>{language === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
+                        <Ionicons name="language" size={20} color={COLORS.primary} />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
                 </View>
 
                 {/* Logo & Title */}
@@ -171,6 +193,14 @@ export default function HomeScreen() {
                   </View>
                   <Text style={styles.title}>{getTranslation('appName')}</Text>
                   <Text style={styles.subtitle}>{getTranslation('tagline')}</Text>
+                  {isAuthenticated && user && (
+                    <View style={styles.userInfo}>
+                      <Text style={styles.welcomeText}>
+                        {language === 'tr' ? 'Merhaba,' : 'Hello,'} 
+                        <Text style={styles.username}> {user.username}</Text>
+                      </Text>
+                    </View>
+                  )}
                 </Animated.View>
 
                 {/* Name Input */}
@@ -297,6 +327,11 @@ const styles = {
     zIndex: 10,
   },
   
+  rightButtons: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  
   topButton: {
     width: 44,
     height: 44,
@@ -316,6 +351,20 @@ const styles = {
   languageEmoji: {
     fontSize: 16,
     marginRight: 4,
+  },
+  
+  userInfo: {
+    marginTop: 10,
+  },
+  
+  welcomeText: {
+    fontSize: 14,
+    color: COLORS.text.secondary,
+  },
+  
+  username: {
+    color: COLORS.primary,
+    fontWeight: '600',
   },
   
   logoContainer: {

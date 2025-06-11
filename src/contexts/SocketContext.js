@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
 
 const SocketContext = createContext();
@@ -40,14 +41,20 @@ export function SocketProvider({ children }) {
     appStateRef.current = nextAppState;
   };
 
-  const connectSocket = () => {
+  const connectSocket = async () => {
     if (socketRef.current?.connected) {
       return;
     }
 
+    // Get auth token if available
+    const token = await AsyncStorage.getItem('accessToken');
+
     const newSocket = io(SERVER_URL, {
       transports: ['websocket', 'polling'],
       reconnectionAttempts: 5,
+      auth: {
+        token: token || null
+      },
       reconnectionDelay: 2000,
       reconnectionDelayMax: 10000,
       timeout: 10000,
