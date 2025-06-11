@@ -99,6 +99,12 @@ export default function HomeScreen() {
     });
   };
 
+  const handleSettings = () => {
+    animateButtonPress(() => {
+      navigation.navigate('Settings');
+    });
+  };
+
   const toggleLanguage = () => {
     setLanguage(language === 'tr' ? 'en' : 'tr');
   };
@@ -121,17 +127,27 @@ export default function HomeScreen() {
               showsVerticalScrollIndicator={false}
             >
               <View style={commonStyles.centerContainer}>
-                {/* Language Toggle */}
-                <TouchableOpacity
-                  style={styles.languageButton}
-                  onPress={toggleLanguage}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.languageButtonContent}>
-                    <Text style={styles.languageEmoji}>{language === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
-                    <Ionicons name="language" size={24} color={COLORS.primary} />
-                  </View>
-                </TouchableOpacity>
+                {/* Top buttons */}
+                <View style={styles.topButtons}>
+                  <TouchableOpacity
+                    style={styles.topButton}
+                    onPress={handleSettings}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="settings-outline" size={24} color={COLORS.text.primary} />
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity
+                    style={styles.topButton}
+                    onPress={toggleLanguage}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.languageButtonContent}>
+                      <Text style={styles.languageEmoji}>{language === 'tr' ? '🇹🇷' : '🇬🇧'}</Text>
+                      <Ionicons name="language" size={20} color={COLORS.primary} />
+                    </View>
+                  </TouchableOpacity>
+                </View>
 
                 {/* Logo & Title */}
                 <Animated.View 
@@ -264,27 +280,35 @@ export default function HomeScreen() {
 }
 
 const styles = {
-  languageButton: {
+  topButtons: {
     position: 'absolute',
     top: 20,
     right: 20,
+    left: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     zIndex: 10,
+  },
+  
+  topButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.surface,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border.default,
   },
   
   languageButtonContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.surface,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 25,
-    borderWidth: 1,
-    borderColor: COLORS.border.default,
   },
   
   languageEmoji: {
-    fontSize: 20,
-    marginRight: 8,
+    fontSize: 16,
+    marginRight: 4,
   },
   
   logoContainer: {

@@ -1,8 +1,9 @@
 import React, { useRef } from 'react';
-import { TouchableOpacity, Text, StyleSheet, Animated, Dimensions } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, Animated, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
+import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -12,10 +13,10 @@ export default function KeyboardKey({ letter, status, onPress, isWide = false })
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.9,
+      toValue: 0.85,
       useNativeDriver: true,
-      speed: 50,
-      bounciness: 4,
+      speed: 60,
+      bounciness: 2,
     }).start();
   };
 
@@ -43,7 +44,7 @@ export default function KeyboardKey({ letter, status, onPress, isWide = false })
 
   const renderContent = () => {
     if (letter === 'ENTER') {
-      return <Text style={[styles.specialText, { color: getTextColor() }]}>{getTranslation('enter')}</Text>;
+      return <Ionicons name="return-down-back" size={20} color={getTextColor()} />;
     } else if (letter === 'BACKSPACE') {
       return <Ionicons name="backspace-outline" size={22} color={getTextColor()} />;
     } else {
@@ -78,7 +79,10 @@ export default function KeyboardKey({ letter, status, onPress, isWide = false })
             width: getKeyWidth(),
           },
         ]}
-        onPress={() => onPress(letter)}
+        onPress={() => {
+          soundManager.playHaptic('light');
+          onPress(letter);
+        }}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.8}
@@ -98,21 +102,28 @@ const styles = StyleSheet.create({
     height: screenWidth < 400 ? 48 : 52,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 6,
-    shadowColor: COLORS.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.15,
-    shadowRadius: 1,
-    elevation: 2,
+    borderRadius: 8,
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.shadow,
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.2,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   
   text: {
     fontSize: screenWidth < 400 ? 16 : 18,
-    fontWeight: '600',
+    fontWeight: '700',
     textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   
   specialText: {

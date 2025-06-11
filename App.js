@@ -11,6 +11,9 @@ import { LanguageProvider } from './src/contexts/LanguageContext';
 import { SocketProvider } from './src/contexts/SocketContext';
 import { GameProvider } from './src/contexts/GameContext';
 
+// Sound Manager
+import soundManager from './src/utils/soundManager';
+
 // Screens
 import HomeScreen from './src/screens/HomeScreen';
 import GameModeScreen from './src/screens/GameModeScreen';
@@ -18,9 +21,11 @@ import LobbyScreen from './src/screens/LobbyScreen';
 import GameScreen from './src/screens/GameScreen';
 import GameOverScreen from './src/screens/GameOverScreen';
 import HowToPlayScreen from './src/screens/HowToPlayScreen';
+import SettingsScreen from './src/screens/SettingsScreen';
 
 // Components
 import SocketEventHandler from './src/components/SocketEventHandler';
+import ConnectionStatus from './src/components/ConnectionStatus';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -43,6 +48,7 @@ function AppNavigator() {
       <Stack.Screen name="Game" component={GameScreen} />
       <Stack.Screen name="GameOver" component={GameOverScreen} />
       <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
+      <Stack.Screen name="Settings" component={SettingsScreen} />
     </Stack.Navigator>
   );
 }
@@ -53,6 +59,9 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
+        // Initialize sound manager
+        await soundManager.init();
+        
         // Pre-load fonts if needed
         await Font.loadAsync({
           // Add custom fonts here if needed
@@ -86,6 +95,7 @@ export default function App() {
               <StatusBar style="dark" backgroundColor="#fff" />
               <AppNavigator />
               <SocketEventHandler />
+              <ConnectionStatus />
             </NavigationContainer>
           </GameProvider>
         </SocketProvider>

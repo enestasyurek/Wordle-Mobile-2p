@@ -17,6 +17,7 @@ import { commonStyles } from '../utils/styles';
 import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
+import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -60,6 +61,9 @@ export default function GameModeScreen() {
   }, []);
 
   const handleSelectWordLength = (length) => {
+    soundManager.playHaptic('medium');
+    soundManager.playSound('submit');
+    
     const socket = global.socketInstance;
     if (!socket || !socket.connected) {
       console.error('Socket not available for single player game');

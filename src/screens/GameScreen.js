@@ -6,15 +6,18 @@ import {
   ScrollView,
   StatusBar,
   Animated,
-  Dimensions
+  Dimensions,
+  Alert,
+  BackHandler
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { commonStyles } from '../utils/styles';
 import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
+import soundManager from '../utils/soundManager';
 import Board from '../components/Board';
 import Keyboard from '../components/Keyboard';
 import Scoreboard from '../components/Scoreboard';
@@ -26,6 +29,7 @@ const { height: screenHeight } = Dimensions.get('window');
 export default function GameScreen() {
   const navigation = useNavigation();
   const { getTranslation } = useLanguage();
+  const socket = global.socketInstance;
   const {
     currentGuess,
     setCurrentGuess,
@@ -69,15 +73,56 @@ export default function GameScreen() {
     ]).start();
   }, []);
 
+  // Handle back button press
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          getTranslation('confirmExit') || 'Çıkmak istiyor musunuz?',
+          getTranslation('confirmExitMessage') || 'Ana menüye dönmek istediğinizden emin misiniz?',
+          [
+            {
+              text: getTranslation('cancel') || 'İptal',
+              style: 'cancel'
+            },
+            {
+              text: getTranslation('yes') || 'Evet',
+              onPress: () => {
+                // Leave the room if in multiplayer mode
+                if (!singlePlayerMode && roomCode && socket) {
+                  socket.emit('leaveRoom', { roomCode });
+                }
+                // Reset game state
+                resetGameState();
+                // Navigate to home
+                navigation.navigate('Home');
+              }
+            }
+          ]
+        );
+        return true; // Prevent default back behavior
+      };
+
+      const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => backHandler.remove();
+    }, [navigation, singlePlayerMode, roomCode, socket, resetGameState, getTranslation])
+  );
+
   const handleKeyPress = (key) => {
     if (!isMyInputActive) return;
 
     if (key === 'ENTER') {
       handleSubmit();
     } else if (key === 'BACKSPACE') {
-      setCurrentGuess(currentGuess.slice(0, -1));
+      if (currentGuess.length > 0) {
+        soundManager.playSound('keyPress');
+        setCurrentGuess(currentGuess.slice(0, -1));
+      }
     } else if (currentGuess.length < wordLength) {
       setCurrentGuess(currentGuess + key);
+    } else {
+      // Word is full - shake to indicate
+      triggerShakeAnimation(guesses.length);
     }
   };
 
@@ -87,6 +132,8 @@ export default function GameScreen() {
       triggerShakeAnimation(guesses.length);
       return;
     }
+
+    soundManager.playSound('submit');
 
     if (singlePlayerMode) {
       submitSinglePlayerGuess(currentGuess);
@@ -103,6 +150,8 @@ export default function GameScreen() {
             triggerShakeAnimation(guesses.length);
           }
         });
+      } else {
+        showNotification(getTranslation('connectionError'), 'error');
       }
     }
     
@@ -164,24 +213,35 @@ export default function GameScreen() {
                 </View>
               </ScrollView>
               
-              {/* Keyboard with gradient background */}
-              <View style={{
-                backgroundColor: COLORS.surface,
-                borderTopWidth: 1,
-                borderTopColor: COLORS.border.default,
-                paddingTop: 8,
-                paddingBottom: Platform.OS === 'ios' ? 20 : 8,
-                shadowColor: COLORS.shadow,
-                shadowOffset: {
-                  width: 0,
-                  height: -4,
-                },
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 8,
-              }}>
-                <Keyboard onKeyPress={handleKeyPress} />
-              </View>
+              {/* Keyboard with enhanced styling */}
+              <LinearGradient
+                colors={[COLORS.surface + 'CC', COLORS.surface]}
+                style={{
+                  borderTopWidth: 1,
+                  borderTopColor: COLORS.border.default,
+                  paddingTop: 12,
+                  paddingBottom: Platform.OS === 'ios' ? 30 : 12,
+                  ...Platform.select({
+                    ios: {
+                      shadowColor: COLORS.shadow,
+                      shadowOffset: {
+                        width: 0,
+                        height: -4,
+                      },
+                      shadowOpacity: 0.15,
+                      shadowRadius: 8,
+                    },
+                    android: {
+                      elevation: 10,
+                    },
+                  }),
+                }}
+              >
+                <Keyboard 
+                  onKeyPress={handleKeyPress} 
+                  disabled={!isMyInputActive || guesses.length >= 6}
+                />
+              </LinearGradient>
             </KeyboardAvoidingView>
           </Animated.View>
         </SafeAreaView>

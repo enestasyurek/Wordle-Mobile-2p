@@ -17,6 +17,7 @@ import { commonStyles } from '../utils/styles';
 import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
+import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -43,6 +44,13 @@ export default function GameOverScreen() {
   const confettiAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    // Play appropriate sound
+    if (isWinner()) {
+      soundManager.playSound('win');
+    } else {
+      soundManager.playSound('lose');
+    }
+
     // Main entrance animation
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -73,6 +81,9 @@ export default function GameOverScreen() {
   }, []);
 
   const handlePlayAgain = () => {
+    soundManager.playHaptic('medium');
+    soundManager.playSound('submit');
+    
     if (singlePlayerMode) {
       resetGameState();
       setGameState('gameMode');
@@ -87,6 +98,9 @@ export default function GameOverScreen() {
   };
 
   const handleNewGame = () => {
+    soundManager.playHaptic('medium');
+    soundManager.playSound('submit');
+    
     const socket = global.socketInstance;
     if (socket && roomCode && !singlePlayerMode) {
       socket.emit('leaveRoom', { roomCode });
@@ -214,7 +228,11 @@ export default function GameOverScreen() {
               {(lastRoundResult?.correctWord || currentWord) && (
                 <TouchableOpacity
                   style={styles.wordCard}
-                  onPress={() => setShowWord(!showWord)}
+                  onPress={() => {
+                    soundManager.playHaptic('light');
+                    soundManager.playSound('reveal');
+                    setShowWord(!showWord);
+                  }}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -339,6 +357,8 @@ const styles = StyleSheet.create({
   resultTitle: {
     fontSize: 32,
     marginBottom: 0,
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
   wordCard: {
     width: '100%',
@@ -421,6 +441,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border.default,
+  },
+  'scoreRow:last-child': {
+    borderBottomWidth: 0,
   },
   playerInfo: {
     flexDirection: 'row',

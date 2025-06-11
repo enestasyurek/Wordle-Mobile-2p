@@ -50,7 +50,7 @@ export function GameProvider({ children }) {
   const [isMyInputActive, setIsMyInputActive] = useState(true);
   const [lastRoundResult, setLastRoundResult] = useState(null);
   const [gameWinner, setGameWinner] = useState(null);
-  const [notification, setNotification] = useState({ message: '', type: 'info' });
+  const [notification, setNotification] = useState({ message: '', type: 'info', duration: 3000 });
   const [isLoading, setIsLoading] = useState(false);
   const [singlePlayerMode, setSinglePlayerMode] = useState(false);
   const [currentWord, setCurrentWord] = useState('');
@@ -134,15 +134,15 @@ export function GameProvider({ children }) {
     }
   };
 
-  const showNotification = (message, type = 'info') => {
-    setNotification({ message, type });
+  const showNotification = (message, type = 'info', duration = 3000) => {
+    setNotification({ message, type, duration });
     // Vibrate on error notifications
     if (type === 'error') {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
     }
     setTimeout(() => {
-      setNotification({ message: '', type: 'info' });
-    }, 3000);
+      setNotification({ message: '', type: 'info', duration: 3000 });
+    }, duration);
   };
 
   const triggerShakeAnimation = (rowIndex) => {

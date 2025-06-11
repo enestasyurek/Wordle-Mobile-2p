@@ -1,31 +1,44 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, Animated, StyleSheet, Dimensions, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGame } from '../contexts/GameContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import { COLORS } from '../utils/colors';
+import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function Notification() {
   const { notification } = useGame();
+  const { getTranslation } = useLanguage();
   const insets = useSafeAreaInsets();
   const slideAnim = useRef(new Animated.Value(-100)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
 
   useEffect(() => {
     if (notification.message) {
-      // Slide in
+      // Play sound based on notification type
+      soundManager.playSound('notification');
+      
+      // Slide in with scale
       Animated.parallel([
         Animated.spring(slideAnim, {
           toValue: 0,
           useNativeDriver: true,
-          speed: 12,
-          bounciness: 8,
+          speed: 14,
+          bounciness: 10,
         }),
         Animated.timing(opacityAnim, {
           toValue: 1,
           duration: 200,
+          useNativeDriver: true,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 60,
           useNativeDriver: true,
         }),
       ]).start();
@@ -43,14 +56,24 @@ export default function Notification() {
             duration: 200,
             useNativeDriver: true,
           }),
+          Animated.timing(scaleAnim, {
+            toValue: 0.8,
+            duration: 200,
+            useNativeDriver: true,
+          }),
         ]).start();
-      }, 3000);
+      }, notification.duration || 3000);
 
       return () => clearTimeout(timer);
     }
   }, [notification.message, notification.id]);
 
   if (!notification.message) return null;
+
+  // Handle translation if message is an array
+  const displayMessage = Array.isArray(notification.message) 
+    ? getTranslation(...notification.message)
+    : getTranslation(notification.message);
 
   const getIcon = () => {
     switch (notification.type) {
@@ -84,7 +107,10 @@ export default function Notification() {
         styles.container,
         {
           top: insets.top + 10,
-          transform: [{ translateY: slideAnim }],
+          transform: [
+            { translateY: slideAnim },
+            { scale: scaleAnim }
+          ],
           opacity: opacityAnim,
         },
       ]}
@@ -95,7 +121,7 @@ export default function Notification() {
           {getIcon()}
         </View>
         <Text style={[styles.text, { color: getTextColor() }]}>
-          {notification.message}
+          {displayMessage}
         </Text>
       </View>
     </Animated.View>
@@ -109,6 +135,17 @@ const styles = StyleSheet.create({
     right: 16,
     zIndex: 1000,
     alignItems: 'center',
+    ...Platform.select({
+      ios: {
+        shadowColor: COLORS.shadow,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
+      },
+      android: {
+        elevation: 16,
+      },
+    }),
   },
   
   notification: {
@@ -117,18 +154,15 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderRadius: 16,
-    shadowColor: COLORS.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 12,
     maxWidth: screenWidth - 32,
     minHeight: 56,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderWidth: Platform.OS === 'ios' ? 1 : 0,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
+    ...Platform.select({
+      ios: {
+        backgroundColor: 'transparent',
+      },
+    }),
   },
   
   iconContainer: {

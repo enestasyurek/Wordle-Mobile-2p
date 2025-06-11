@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet, Dimensions } from 'react-native';
 import { COLORS } from '../utils/colors';
 import { ANIMATION_DURATIONS } from '../utils/constants';
+import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -15,16 +16,17 @@ export default function Tile({ letter, status, delay = 0, isRevealing, shake, bo
   // Pop animation when letter is entered
   useEffect(() => {
     if (letter && !status) {
+      soundManager.playSound('keyPress');
       Animated.sequence([
         Animated.timing(popAnim, {
-          toValue: 1.1,
+          toValue: 1.15,
           duration: 100,
           useNativeDriver: true,
         }),
         Animated.spring(popAnim, {
           toValue: 1,
-          friction: 3,
-          tension: 40,
+          friction: 4,
+          tension: 50,
           useNativeDriver: true,
         }),
       ]).start();
@@ -36,29 +38,49 @@ export default function Tile({ letter, status, delay = 0, isRevealing, shake, bo
     if (isRevealing && status) {
       Animated.sequence([
         Animated.delay(delay),
-        Animated.timing(rotateAnim, {
-          toValue: 0.5,
-          duration: ANIMATION_DURATIONS.flip,
-          useNativeDriver: true,
-        }),
-        Animated.timing(rotateAnim, {
-          toValue: 1,
-          duration: ANIMATION_DURATIONS.flip,
-          useNativeDriver: true,
-        }),
-      ]).start();
+        Animated.parallel([
+          Animated.timing(rotateAnim, {
+            toValue: 0.5,
+            duration: ANIMATION_DURATIONS.flip,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 0.9,
+            duration: ANIMATION_DURATIONS.flip / 2,
+            useNativeDriver: true,
+          }),
+        ]),
+        Animated.parallel([
+          Animated.timing(rotateAnim, {
+            toValue: 1,
+            duration: ANIMATION_DURATIONS.flip,
+            useNativeDriver: true,
+          }),
+          Animated.spring(scaleAnim, {
+            toValue: 1,
+            friction: 4,
+            tension: 50,
+            useNativeDriver: true,
+          }),
+        ]),
+      ]).start(() => {
+        if (status === 'correct') {
+          soundManager.playSound('reveal');
+        }
+      });
     }
   }, [isRevealing, status, delay]);
 
   // Shake animation
   useEffect(() => {
     if (shake) {
+      soundManager.playSound('wrong');
       Animated.sequence([
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: -10, duration: 50, useNativeDriver: true }),
-        Animated.timing(shakeAnim, { toValue: 0, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 12, duration: 50, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -12, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 8, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: -8, duration: 60, useNativeDriver: true }),
+        Animated.timing(shakeAnim, { toValue: 0, duration: 70, useNativeDriver: true }),
       ]).start();
     }
   }, [shake]);
@@ -66,12 +88,13 @@ export default function Tile({ letter, status, delay = 0, isRevealing, shake, bo
   // Bounce animation
   useEffect(() => {
     if (bounce) {
+      soundManager.playSound('correct');
       Animated.sequence([
-        Animated.timing(bounceAnim, { toValue: -20, duration: 200, useNativeDriver: true }),
+        Animated.timing(bounceAnim, { toValue: -25, duration: 200, useNativeDriver: true }),
         Animated.spring(bounceAnim, {
           toValue: 0,
-          friction: 3,
-          tension: 40,
+          friction: 2.5,
+          tension: 60,
           useNativeDriver: true,
         }),
       ]).start();
@@ -103,7 +126,7 @@ export default function Tile({ letter, status, delay = 0, isRevealing, shake, bo
       { rotateX: rotateInterpolate },
       { translateX: shakeAnim },
       { translateY: bounceAnim },
-      { scale: popAnim },
+      { scale: Animated.multiply(popAnim, scaleAnim) },
     ],
   };
 
@@ -151,7 +174,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     margin: 3,
-    borderRadius: screenWidth < 400 ? 3 : 4,
+    borderRadius: screenWidth < 400 ? 4 : 6,
     shadowColor: COLORS.shadow,
     shadowOffset: {
       width: 0,
