@@ -14,7 +14,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import colors from '../utils/colors';
+import { COLORS } from '../utils/colors';
 
 const LoginScreen = ({ navigation }) => {
   const [mode, setMode] = useState('login'); // 'login' or 'register'
@@ -185,7 +185,7 @@ const LoginScreen = ({ navigation }) => {
               <TextInput
                 style={[styles.input, errors.username && styles.inputError]}
                 placeholder={t('username', translations)}
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={COLORS.text.secondary}
                 value={formData.username}
                 onChangeText={(value) => handleInputChange('username', value)}
                 autoCapitalize="none"
@@ -202,7 +202,7 @@ const LoginScreen = ({ navigation }) => {
                 <TextInput
                   style={[styles.input, errors.email && styles.inputError]}
                   placeholder={t('email', translations)}
-                  placeholderTextColor={colors.textSecondary}
+                  placeholderTextColor={COLORS.text.secondary}
                   value={formData.email}
                   onChangeText={(value) => handleInputChange('email', value)}
                   keyboardType="email-address"
@@ -220,7 +220,7 @@ const LoginScreen = ({ navigation }) => {
               <TextInput
                 style={[styles.input, errors.password && styles.inputError]}
                 placeholder={t('password', translations)}
-                placeholderTextColor={colors.textSecondary}
+                placeholderTextColor={COLORS.text.secondary}
                 value={formData.password}
                 onChangeText={(value) => handleInputChange('password', value)}
                 secureTextEntry
@@ -238,7 +238,7 @@ const LoginScreen = ({ navigation }) => {
                 <TextInput
                   style={[styles.input, errors.confirmPassword && styles.inputError]}
                   placeholder={t('confirmPassword', translations)}
-                  placeholderTextColor={colors.textSecondary}
+                  placeholderTextColor={COLORS.text.secondary}
                   value={formData.confirmPassword}
                   onChangeText={(value) => handleInputChange('confirmPassword', value)}
                   secureTextEntry
@@ -258,7 +258,7 @@ const LoginScreen = ({ navigation }) => {
               disabled={isLoading}
             >
               {isLoading ? (
-                <ActivityIndicator color={colors.background} />
+                <ActivityIndicator color={COLORS.background} />
               ) : (
                 <Text style={styles.submitButtonText}>
                   {t(`${mode}Button`, translations)}
@@ -287,7 +287,7 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: COLORS.background,
   },
   keyboardView: {
     flex: 1,
@@ -307,21 +307,21 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: 'bold',
-    color: colors.text,
+    color: COLORS.text.primary,
   },
   skipButton: {
     padding: 10,
   },
   skipText: {
-    color: colors.primary,
+    color: COLORS.primary,
     fontSize: 16,
   },
   form: {
     width: '100%',
   },
   errorContainer: {
-    backgroundColor: colors.incorrect + '20',
-    borderColor: colors.incorrect,
+    backgroundColor: COLORS.error + '20',
+    borderColor: COLORS.error,
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
@@ -331,26 +331,26 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   input: {
-    backgroundColor: colors.tileEmpty,
-    borderColor: colors.border,
+    backgroundColor: COLORS.empty,
+    borderColor: COLORS.border.default,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: colors.text,
+    color: COLORS.text.primary,
   },
   inputError: {
-    borderColor: colors.incorrect,
+    borderColor: COLORS.error,
   },
   errorText: {
-    color: colors.incorrect,
+    color: COLORS.error,
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,
   },
   submitButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: COLORS.primary,
     borderRadius: 8,
     paddingVertical: 16,
     alignItems: 'center',
@@ -361,7 +361,7 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   submitButtonText: {
-    color: colors.background,
+    color: COLORS.background,
     fontSize: 18,
     fontWeight: 'bold',
   },
@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   switchText: {
-    color: colors.primary,
+    color: COLORS.primary,
     fontSize: 14,
     marginBottom: 16,
   },
@@ -377,7 +377,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   guestText: {
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     fontSize: 14,
   },
 });

@@ -11,7 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import colors from '../utils/colors';
+import { COLORS } from '../utils/colors';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, getStats } = useAuth();
@@ -178,7 +178,7 @@ const ProfileScreen = ({ navigation }) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
+          <ActivityIndicator size="large" color={COLORS.primary} />
         </View>
       </SafeAreaView>
     );
@@ -314,7 +314,7 @@ const ProfileScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
@@ -329,44 +329,44 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
   },
   backButton: {
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     fontSize: 16,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: colors.text,
+    color: COLORS.text.primary,
   },
   logoutButton: {
-    color: colors.incorrect,
+    color: COLORS.error,
     fontSize: 16,
   },
   userInfo: {
     paddingHorizontal: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: COLORS.border.default,
   },
   username: {
     fontSize: 20,
     fontWeight: '600',
-    color: colors.primary,
+    color: COLORS.primary,
     marginBottom: 4,
   },
   email: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
   },
   section: {
     paddingHorizontal: 20,
     paddingVertical: 20,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    borderBottomColor: COLORS.border.default,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: colors.text,
+    color: COLORS.text.primary,
     marginBottom: 16,
   },
   mainStatsGrid: {
@@ -384,18 +384,18 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: colors.text,
+    color: COLORS.text.primary,
   },
   statLabel: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     marginTop: 4,
   },
   winRateValue: {
-    color: colors.correct,
+    color: COLORS.correct,
   },
   streakValue: {
-    color: colors.primary,
+    color: COLORS.primary,
   },
   bestStreakValue: {
     color: '#A78BFA',
@@ -413,17 +413,17 @@ const styles = StyleSheet.create({
   },
   winLossLabel: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     marginTop: 4,
   },
   winsValue: {
-    color: colors.correct,
+    color: COLORS.correct,
   },
   lossesValue: {
-    color: colors.incorrect,
+    color: COLORS.error,
   },
   avgValue: {
-    color: colors.primary,
+    color: COLORS.primary,
   },
   distributionContainer: {
     marginTop: 8,
@@ -436,26 +436,26 @@ const styles = StyleSheet.create({
   distributionNumber: {
     width: 20,
     fontSize: 14,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
   },
   distributionBarContainer: {
     flex: 1,
     height: 24,
-    backgroundColor: colors.tileEmpty,
+    backgroundColor: COLORS.empty,
     borderRadius: 4,
     marginLeft: 8,
     overflow: 'hidden',
   },
   distributionBar: {
     height: '100%',
-    backgroundColor: colors.correct,
+    backgroundColor: COLORS.correct,
     justifyContent: 'center',
     alignItems: 'flex-end',
     paddingRight: 8,
   },
   distributionCount: {
     fontSize: 12,
-    color: colors.text,
+    color: COLORS.text.primary,
     fontWeight: '600',
   },
   gridContainer: {
@@ -471,27 +471,27 @@ const styles = StyleSheet.create({
   gridItemNumber: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: colors.primary,
+    color: COLORS.primary,
     textAlign: 'center',
   },
   gridItemLabel: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     textAlign: 'center',
     marginBottom: 8,
   },
   gridItemStats: {
-    backgroundColor: colors.tileEmpty,
+    backgroundColor: COLORS.empty,
     borderRadius: 8,
     padding: 12,
   },
   gridItemStat: {
     fontSize: 12,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     textAlign: 'center',
   },
   gridItemWinRate: {
-    color: colors.correct,
+    color: COLORS.correct,
     fontWeight: '600',
     marginTop: 4,
   },
@@ -502,7 +502,7 @@ const styles = StyleSheet.create({
   gameModeItem: {
     flex: 1,
     paddingHorizontal: 8,
-    backgroundColor: colors.tileEmpty,
+    backgroundColor: COLORS.empty,
     borderRadius: 8,
     padding: 16,
     marginHorizontal: 4,
@@ -510,18 +510,18 @@ const styles = StyleSheet.create({
   gameModeTitle: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.primary,
+    color: COLORS.primary,
     marginBottom: 8,
     textAlign: 'center',
   },
   gameModeGames: {
     fontSize: 14,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
     textAlign: 'center',
   },
   gameModeWinRate: {
     fontSize: 14,
-    color: colors.correct,
+    color: COLORS.correct,
     fontWeight: '600',
     textAlign: 'center',
     marginTop: 4,
@@ -534,7 +534,7 @@ const styles = StyleSheet.create({
   },
   noStatsText: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: COLORS.text.secondary,
   },
 });
 

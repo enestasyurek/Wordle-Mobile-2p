@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import * as Font from 'expo-font';
@@ -38,11 +39,14 @@ const Stack = createStackNavigator();
 function AppNavigator() {
   return (
     <Stack.Navigator
+      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
-        cardStyle: { backgroundColor: '#fff' },
+        cardStyle: { backgroundColor: '#0f172a' },
         animationEnabled: true,
         animationTypeForReplace: 'push',
+        gestureEnabled: true,
+        gestureDirection: 'horizontal',
       }}
     >
       <Stack.Screen name="Home" component={HomeScreen} />
@@ -92,21 +96,23 @@ export default function App() {
   }
 
   return (
-    <SafeAreaProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <SocketProvider>
-            <GameProvider>
-              <NavigationContainer onReady={onLayoutRootView}>
-                <StatusBar style="dark" backgroundColor="#fff" />
-                <AppNavigator />
-                <SocketEventHandler />
-                <ConnectionStatus />
-              </NavigationContainer>
-            </GameProvider>
-          </SocketProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <GameProvider>
+                <NavigationContainer onReady={onLayoutRootView}>
+                  <StatusBar style="light" backgroundColor="#0f172a" />
+                  <AppNavigator />
+                  <SocketEventHandler />
+                  <ConnectionStatus />
+                </NavigationContainer>
+              </GameProvider>
+            </SocketProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }
