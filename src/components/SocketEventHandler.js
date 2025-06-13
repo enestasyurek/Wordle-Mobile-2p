@@ -383,6 +383,42 @@ export default function SocketEventHandler() {
         }
       }
     };
+    
+    // Handle game invites (for future friend system implementation)
+    const handleGameInviteReceived = (data) => {
+      console.log('Game invite received:', data);
+      // TODO: Show notification when friend system is implemented
+    };
+    
+    const handleJoinRoom = (data) => {
+      const { roomCode: inviteRoomCode } = data;
+      if (inviteRoomCode && playerName.trim()) {
+        socket.emit('joinRoom', { roomCode: inviteRoomCode, playerName: playerName.trim() }, (response) => {
+          if (response.success) {
+            setRoomCode(response.roomCode);
+            setPlayers(response.players);
+            setMyId(socket.id);
+            setGameState('lobby');
+            if (response.wordLength) {
+              setWordLength(response.wordLength);
+            }
+            showNotification(['roomJoined', response.roomCode], 'success');
+            navigation.navigate('Lobby');
+            
+            // Automatically start the game after joining from invite
+            setTimeout(() => {
+              socket.emit('startGame', { roomCode: response.roomCode }, (startResponse) => {
+                if (!startResponse.success) {
+                  showNotification(startResponse.message || 'gameStartFailed', 'error');
+                }
+              });
+            }, 1000);
+          } else {
+            showNotification(response.message || 'roomJoinFailed', 'error');
+          }
+        });
+      }
+    };
 
     // Register all event listeners
     socket.on('connect', handleConnect);
@@ -397,6 +433,8 @@ export default function SocketEventHandler() {
     socket.on('error', handleServerError);
     socket.on('singlePlayerRoundStart', handleSinglePlayerRoundStart);
     socket.on('singlePlayerGuessResult', handleSinglePlayerGuessResult);
+    socket.on('game-invite-received', handleGameInviteReceived);
+    socket.on('join-room', handleJoinRoom);
 
     // Cleanup function
     return () => {
@@ -413,6 +451,8 @@ export default function SocketEventHandler() {
       socket.off('error', handleServerError);
       socket.off('singlePlayerRoundStart', handleSinglePlayerRoundStart);
       socket.off('singlePlayerGuessResult', handleSinglePlayerGuessResult);
+      socket.off('game-invite-received', handleGameInviteReceived);
+      socket.off('join-room', handleJoinRoom);
     };
   }, [socket]);
 

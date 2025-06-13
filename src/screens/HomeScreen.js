@@ -37,6 +37,14 @@ export default function HomeScreen() {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const buttonScale = useRef(new Animated.Value(1)).current;
+  
+  // Set player name to username when logged in
+  useEffect(() => {
+    if (user && user.username) {
+      setNameInput(user.username);
+      setPlayerName(user.username);
+    }
+  }, [user, setPlayerName]);
 
   useEffect(() => {
     // Clean up any existing room connection when arriving at home screen
@@ -214,16 +222,18 @@ export default function HomeScreen() {
                     style={[
                       styles.input,
                       isFocused && styles.inputFocused,
+                      isAuthenticated && styles.inputReadOnly,
                     ]}
                     placeholder={getTranslation('enterYourName')}
                     placeholderTextColor={COLORS.text.muted}
                     value={nameInput}
-                    onChangeText={setNameInput}
+                    onChangeText={isAuthenticated ? undefined : setNameInput}
                     maxLength={20}
-                    onFocus={() => setIsFocused(true)}
+                    onFocus={() => !isAuthenticated && setIsFocused(true)}
                     onBlur={() => setIsFocused(false)}
                     autoCapitalize="words"
                     autoCorrect={false}
+                    editable={!isAuthenticated}
                   />
                 </Animated.View>
 
@@ -438,6 +448,11 @@ const styles = {
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 5,
+  },
+  
+  inputReadOnly: {
+    backgroundColor: COLORS.border.default,
+    opacity: 0.8,
   },
   
   buttonsContainer: {
