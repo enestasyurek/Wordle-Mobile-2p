@@ -28,7 +28,7 @@ const LoginScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const { login, register } = useAuth();
-  const { t } = useLanguage();
+  const { language, getTranslation } = useLanguage();
 
   const translations = {
     tr: {
@@ -79,33 +79,38 @@ const LoginScreen = ({ navigation }) => {
     }
   };
 
+  // Helper function to get translations from local translations object
+  const t = (key, translationsObj = translations) => {
+    return translationsObj[language]?.[key] || translationsObj['en']?.[key] || key;
+  };
+
   const validate = () => {
     const newErrors = {};
     
     if (!formData.username.trim()) {
-      newErrors.username = t('usernameRequired', translations);
+      newErrors.username = t('usernameRequired');
     } else if (formData.username.length < 3) {
-      newErrors.username = t('usernameTooShort', translations);
+      newErrors.username = t('usernameTooShort');
     } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = t('usernameInvalid', translations);
+      newErrors.username = t('usernameInvalid');
     }
     
     if (mode === 'register') {
       if (!formData.email.trim()) {
-        newErrors.email = t('emailRequired', translations);
+        newErrors.email = t('emailRequired');
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = t('invalidEmail', translations);
+        newErrors.email = t('invalidEmail');
       }
     }
     
     if (!formData.password) {
-      newErrors.password = t('passwordRequired', translations);
+      newErrors.password = t('passwordRequired');
     } else if (formData.password.length < 6) {
-      newErrors.password = t('passwordTooShort', translations);
+      newErrors.password = t('passwordTooShort');
     }
     
     if (mode === 'register' && formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = t('passwordMismatch', translations);
+      newErrors.confirmPassword = t('passwordMismatch');
     }
     
     setErrors(newErrors);
@@ -126,7 +131,10 @@ const LoginScreen = ({ navigation }) => {
       }
       
       if (result.success) {
-        navigation.navigate('Home');
+        // Add a small delay to ensure socket reconnects with the new token
+        setTimeout(() => {
+          navigation.navigate('Home');
+        }, 100);
       } else {
         Alert.alert(
           mode === 'login' ? 'Login Failed' : 'Registration Failed',
@@ -168,9 +176,9 @@ const LoginScreen = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Text style={styles.title}>{t(mode, translations)}</Text>
+            <Text style={styles.title}>{t(mode)}</Text>
             <TouchableOpacity onPress={continueAsGuest} style={styles.skipButton}>
-              <Text style={styles.skipText}>{t('skip', translations)}</Text>
+              <Text style={styles.skipText}>{t('skip')}</Text>
             </TouchableOpacity>
           </View>
 
@@ -184,7 +192,7 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.username && styles.inputError]}
-                placeholder={t('username', translations)}
+                placeholder={t('username')}
                 placeholderTextColor={COLORS.text.secondary}
                 value={formData.username}
                 onChangeText={(value) => handleInputChange('username', value)}
@@ -201,7 +209,7 @@ const LoginScreen = ({ navigation }) => {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={[styles.input, errors.email && styles.inputError]}
-                  placeholder={t('email', translations)}
+                  placeholder={t('email')}
                   placeholderTextColor={COLORS.text.secondary}
                   value={formData.email}
                   onChangeText={(value) => handleInputChange('email', value)}
@@ -219,7 +227,7 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.inputContainer}>
               <TextInput
                 style={[styles.input, errors.password && styles.inputError]}
-                placeholder={t('password', translations)}
+                placeholder={t('password')}
                 placeholderTextColor={COLORS.text.secondary}
                 value={formData.password}
                 onChangeText={(value) => handleInputChange('password', value)}
@@ -237,7 +245,7 @@ const LoginScreen = ({ navigation }) => {
               <View style={styles.inputContainer}>
                 <TextInput
                   style={[styles.input, errors.confirmPassword && styles.inputError]}
-                  placeholder={t('confirmPassword', translations)}
+                  placeholder={t('confirmPassword')}
                   placeholderTextColor={COLORS.text.secondary}
                   value={formData.confirmPassword}
                   onChangeText={(value) => handleInputChange('confirmPassword', value)}
@@ -261,7 +269,7 @@ const LoginScreen = ({ navigation }) => {
                 <ActivityIndicator color={COLORS.background} />
               ) : (
                 <Text style={styles.submitButtonText}>
-                  {t(`${mode}Button`, translations)}
+                  {t(`${mode}Button`)}
                 </Text>
               )}
             </TouchableOpacity>
@@ -269,12 +277,12 @@ const LoginScreen = ({ navigation }) => {
             <View style={styles.footer}>
               <TouchableOpacity onPress={switchMode}>
                 <Text style={styles.switchText}>
-                  {mode === 'login' ? t('noAccount', translations) : t('hasAccount', translations)}
+                  {mode === 'login' ? t('noAccount') : t('hasAccount')}
                 </Text>
               </TouchableOpacity>
               
               <TouchableOpacity onPress={continueAsGuest} style={styles.guestButton}>
-                <Text style={styles.guestText}>{t('continueAsGuest', translations)}</Text>
+                <Text style={styles.guestText}>{t('continueAsGuest')}</Text>
               </TouchableOpacity>
             </View>
           </View>

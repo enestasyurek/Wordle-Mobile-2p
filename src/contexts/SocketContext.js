@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useRef, useState } from 'r
 import { AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import io from 'socket.io-client';
+import { useAuth } from './AuthContext';
 
 const SocketContext = createContext();
 
@@ -13,6 +14,7 @@ export function SocketProvider({ children }) {
   const [isConnected, setIsConnected] = useState(false);
   const socketRef = useRef(null);
   const appStateRef = useRef(AppState.currentState);
+  const { user } = useAuth();
 
   useEffect(() => {
     connectSocket();
@@ -27,6 +29,17 @@ export function SocketProvider({ children }) {
       subscription?.remove();
     };
   }, []);
+
+  // Reconnect socket when user authentication changes
+  useEffect(() => {
+    if (socketRef.current) {
+      console.log('User auth changed, reconnecting socket...');
+      socketRef.current.disconnect();
+      setTimeout(() => {
+        connectSocket();
+      }, 100);
+    }
+  }, [user]);
 
   const handleAppStateChange = (nextAppState) => {
     if (
@@ -90,8 +103,16 @@ export function SocketProvider({ children }) {
     global.socketInstance = newSocket;
   };
 
+  const reconnectSocket = async () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    await connectSocket();
+  };
+
   return (
-    <SocketContext.Provider value={{ socket, isConnected }}>
+    <SocketContext.Provider value={{ socket, isConnected, reconnectSocket }}>
       {children}
     </SocketContext.Provider>
   );
