@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(eas whoami:*)",
+      "Bash(eas build:*)",
+      "Bash(EAS_SKIP_AUTO_FINGERPRINT=1 eas build --platform android --profile preview)",
+      "Bash(npm run android:build:*)",
+      "Bash(cp:*)",
+      "Bash(npx expo prebuild:*)"
+    ],
+    "deny": []
+  }
+}

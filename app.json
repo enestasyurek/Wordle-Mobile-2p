@@ -30,7 +30,9 @@
       },
       "package": "com.kelimesavasi.app",
       "versionCode": 1,
-      "permissions": ["INTERNET"],
+      "permissions": [
+        "INTERNET"
+      ],
       "edgeToEdgeEnabled": true
     },
     "web": {
@@ -38,6 +40,11 @@
     },
     "plugins": [
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "362d5657-9d67-440b-a801-da72f7ead66b"
+      }
+    }
   }
 }
