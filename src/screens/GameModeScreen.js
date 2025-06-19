@@ -17,14 +17,16 @@ import { commonStyles } from '../utils/styles';
 import { COLORS } from '../utils/colors';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
+import { useSocket } from '../contexts/SocketContext';
 import soundManager from '../utils/soundManager';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 export default function GameModeScreen() {
   const navigation = useNavigation();
-  const { getTranslation } = useLanguage();
-  const { setWordLength, startNewSinglePlayerRound, setGameState } = useGame();
+  const { getTranslation, language } = useLanguage();
+  const { setWordLength, startNewSinglePlayerRound, setGameState, playerName, setPlayerName, setSinglePlayerMode, setRoomCode, setPlayers, setMyId, showNotification } = useGame();
+  const { socket } = useSocket();
   
   // Animations
   const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -64,26 +66,43 @@ export default function GameModeScreen() {
     soundManager.playHaptic('medium');
     soundManager.playSound('submit');
     
-    const socket = global.socketInstance;
     if (!socket || !socket.connected) {
       console.error('Socket not available for single player game');
+      showNotification(getTranslation('connectionError'), 'error');
       return;
     }
     
-    setWordLength(length);
-    setGameState('game');
-    navigation.navigate('Game');
+    // If player name is empty, we'll let the server assign a default name
+    const nameToSend = playerName?.trim() || '';
     
-    // Request single player game from server
-    setTimeout(() => {
-      if (socket && socket.connected) {
-        socket.emit('createSinglePlayerGame', { wordLength: length }, (response) => {
-          if (!response.success) {
-            console.error('Failed to start single player game:', response.message);
-          }
-        });
+    setSinglePlayerMode(true);
+    setWordLength(length);
+    
+    // Create single player game with all required parameters
+    socket.emit('createSinglePlayerGame', { 
+      playerName: nameToSend,
+      language: language,
+      wordLength: length 
+    }, (response) => {
+      if (response && response.success) {
+        // Use the room code from server response to ensure consistency
+        setRoomCode(response.roomCode);
+        setPlayers([response.player]);
+        setMyId(response.player.id);
+        
+        // If name was empty, update it with the server-assigned name
+        if (!playerName?.trim() && response.player.name) {
+          setPlayerName(response.player.name);
+        }
+        
+        setGameState('game');
+        navigation.navigate('Game');
+      } else {
+        console.error('Failed to start single player game:', response?.message || 'Unknown error');
+        showNotification(response?.message || getTranslation('singlePlayerStartFailed'), 'error');
+        setSinglePlayerMode(false);
       }
-    }, 100);
+    });
   };
 
   const handleBack = () => {

@@ -380,6 +380,19 @@ export default function SocketEventHandler() {
           navigation.navigate('GameOver');
         } else {
           setGameState('roundResult');
+          
+          // Automatically request next round after a delay
+          setTimeout(() => {
+            console.log('Auto-starting next single player round');
+            if (socket && socket.connected) {
+              socket.emit('requestNextSinglePlayerRound', { roomCode: socket.id }, (response) => {
+                if (response && !response.success) {
+                  console.error('Failed to start new single player round:', response.message);
+                  showNotification(response.message || 'newRoundFailed', 'error');
+                }
+              });
+            }
+          }, 3000); // 3 second delay to show the result
         }
       }
     };
