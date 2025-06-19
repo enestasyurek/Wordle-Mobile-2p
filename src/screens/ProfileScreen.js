@@ -15,9 +15,12 @@ import { COLORS } from '../utils/colors';
 
 const ProfileScreen = ({ navigation }) => {
   const { user, logout, getStats } = useAuth();
-  const { t, language } = useLanguage();
+  const { language } = useLanguage();
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Helper function to get translations
+  const t = (key) => translations[language][key] || key;
 
   const translations = {
     tr: {
@@ -89,15 +92,15 @@ const ProfileScreen = ({ navigation }) => {
 
   const handleLogout = () => {
     Alert.alert(
-      t('logout', translations),
-      t('logoutConfirm', translations),
+      t('logout'),
+      t('logoutConfirm'),
       [
         {
-          text: t('cancel', translations),
+          text: t('cancel'),
           style: 'cancel'
         },
         {
-          text: t('logout', translations),
+          text: t('logout'),
           style: 'destructive',
           onPress: async () => {
             await logout();
@@ -158,13 +161,13 @@ const ProfileScreen = ({ navigation }) => {
           return (
             <View key={length} style={styles.gridItem}>
               <Text style={styles.gridItemNumber}>{length}</Text>
-              <Text style={styles.gridItemLabel}>{t('letters', translations)}</Text>
+              <Text style={styles.gridItemLabel}>{t('letters')}</Text>
               <View style={styles.gridItemStats}>
                 <Text style={styles.gridItemStat}>
-                  {lengthStats.games} {t('games', translations)}
+                  {lengthStats.games} {t('games')}
                 </Text>
                 <Text style={[styles.gridItemStat, styles.gridItemWinRate]}>
-                  {winRate}% {t('winRate', translations)}
+                  {winRate}% {t('winRate')}
                 </Text>
               </View>
             </View>
@@ -190,11 +193,11 @@ const ProfileScreen = ({ navigation }) => {
         {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Text style={styles.backButton}>{t('back', translations)}</Text>
+            <Text style={styles.backButton}>{t('back')}</Text>
           </TouchableOpacity>
-          <Text style={styles.title}>{t('profile', translations)}</Text>
+          <Text style={styles.title}>{t('profile')}</Text>
           <TouchableOpacity onPress={handleLogout}>
-            <Text style={styles.logoutButton}>{t('logout', translations)}</Text>
+            <Text style={styles.logoutButton}>{t('logout')}</Text>
           </TouchableOpacity>
         </View>
 
@@ -209,30 +212,30 @@ const ProfileScreen = ({ navigation }) => {
           <>
             {/* Main Stats */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('statistics', translations)}</Text>
+              <Text style={styles.sectionTitle}>{t('statistics')}</Text>
               
               <View style={styles.mainStatsGrid}>
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>{stats.totalGames}</Text>
-                  <Text style={styles.statLabel}>{t('totalGames', translations)}</Text>
+                  <Text style={styles.statLabel}>{t('totalGames')}</Text>
                 </View>
                 <View style={styles.statItem}>
                   <Text style={[styles.statValue, styles.winRateValue]}>
                     {stats.winPercentage}%
                   </Text>
-                  <Text style={styles.statLabel}>{t('winRate', translations)}</Text>
+                  <Text style={styles.statLabel}>{t('winRate')}</Text>
                 </View>
                 <View style={styles.statItem}>
                   <Text style={[styles.statValue, styles.streakValue]}>
                     {stats.currentStreak}
                   </Text>
-                  <Text style={styles.statLabel}>{t('currentStreak', translations)}</Text>
+                  <Text style={styles.statLabel}>{t('currentStreak')}</Text>
                 </View>
                 <View style={styles.statItem}>
                   <Text style={[styles.statValue, styles.bestStreakValue]}>
                     {stats.maxStreak}
                   </Text>
-                  <Text style={styles.statLabel}>{t('bestStreak', translations)}</Text>
+                  <Text style={styles.statLabel}>{t('bestStreak')}</Text>
                 </View>
               </View>
 
@@ -242,60 +245,60 @@ const ProfileScreen = ({ navigation }) => {
                   <Text style={[styles.winLossValue, styles.winsValue]}>
                     {stats.wins}
                   </Text>
-                  <Text style={styles.winLossLabel}>{t('wins', translations)}</Text>
+                  <Text style={styles.winLossLabel}>{t('wins')}</Text>
                 </View>
                 <View style={styles.winLossItem}>
                   <Text style={[styles.winLossValue, styles.lossesValue]}>
                     {stats.losses}
                   </Text>
-                  <Text style={styles.winLossLabel}>{t('losses', translations)}</Text>
+                  <Text style={styles.winLossLabel}>{t('losses')}</Text>
                 </View>
                 <View style={styles.winLossItem}>
                   <Text style={[styles.winLossValue, styles.avgValue]}>
                     {stats.averageGuesses}
                   </Text>
-                  <Text style={styles.winLossLabel}>{t('avgGuesses', translations)}</Text>
+                  <Text style={styles.winLossLabel}>{t('avgGuesses')}</Text>
                 </View>
               </View>
             </View>
 
             {/* Guess Distribution */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('guessDistribution', translations)}</Text>
+              <Text style={styles.sectionTitle}>{t('guessDistribution')}</Text>
               {renderGuessDistribution()}
             </View>
 
             {/* Word Length Stats */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('wordLengthStats', translations)}</Text>
+              <Text style={styles.sectionTitle}>{t('wordLengthStats')}</Text>
               {renderWordLengthStats()}
             </View>
 
             {/* Game Mode Stats */}
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>{t('gameModeStats', translations)}</Text>
+              <Text style={styles.sectionTitle}>{t('gameModeStats')}</Text>
               <View style={styles.gameModeContainer}>
                 <View style={styles.gameModeItem}>
-                  <Text style={styles.gameModeTitle}>{t('singlePlayer', translations)}</Text>
+                  <Text style={styles.gameModeTitle}>{t('singlePlayer')}</Text>
                   <Text style={styles.gameModeGames}>
-                    {stats.singlePlayerStats.games} {t('games', translations)}
+                    {stats.singlePlayerStats.games} {t('games')}
                   </Text>
                   <Text style={styles.gameModeWinRate}>
                     {stats.singlePlayerStats.games > 0 
                       ? ((stats.singlePlayerStats.wins / stats.singlePlayerStats.games) * 100).toFixed(0)
-                      : 0}% {t('winRate', translations)}
+                      : 0}% {t('winRate')}
                   </Text>
                 </View>
                 
                 <View style={styles.gameModeItem}>
-                  <Text style={styles.gameModeTitle}>{t('multiPlayer', translations)}</Text>
+                  <Text style={styles.gameModeTitle}>{t('multiPlayer')}</Text>
                   <Text style={styles.gameModeGames}>
-                    {stats.multiPlayerStats.games} {t('games', translations)}
+                    {stats.multiPlayerStats.games} {t('games')}
                   </Text>
                   <Text style={styles.gameModeWinRate}>
                     {stats.multiPlayerStats.games > 0 
                       ? ((stats.multiPlayerStats.wins / stats.multiPlayerStats.games) * 100).toFixed(0)
-                      : 0}% {t('winRate', translations)}
+                      : 0}% {t('winRate')}
                   </Text>
                 </View>
               </View>
@@ -303,7 +306,7 @@ const ProfileScreen = ({ navigation }) => {
           </>
         ) : (
           <View style={styles.noStatsContainer}>
-            <Text style={styles.noStatsText}>{t('noStats', translations)}</Text>
+            <Text style={styles.noStatsText}>{t('noStats')}</Text>
           </View>
         )}
       </ScrollView>
