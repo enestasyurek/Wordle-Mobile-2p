@@ -2,6 +2,7 @@ export const COLORS = {
   // Primary colors - matching web version
   primary: '#22c55e',
   primaryDark: '#16a34a',
+  primaryLight: 'rgba(34, 197, 94, 0.1)',
   secondary: '#4f46e5',
   secondaryDark: '#4338ca',
   

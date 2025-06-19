@@ -1,12 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL } from '../utils/constants';
-
 const AuthContext = createContext();
 
-// Configure axios defaults
-axios.defaults.baseURL = API_URL;
+// Configure axios defaults - don't set baseURL here since we use full URLs
 
 // Add token to requests if it exists
 axios.interceptors.request.use(
@@ -32,10 +29,17 @@ axios.interceptors.response.use(
       try {
         const refreshToken = await AsyncStorage.getItem('refreshToken');
         if (refreshToken) {
-          const response = await axios.post('/api/auth/refresh', { refreshToken });
+          const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+          const response = await axios.post(`${API_URL}/api/auth/refresh`, { refreshToken });
           const { accessToken } = response.data;
           await AsyncStorage.setItem('accessToken', accessToken);
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          
+          // Update token in context if AuthContext is available
+          if (window._authContext) {
+            window._authContext.setToken(accessToken);
+          }
+          
           return axios(originalRequest);
         }
       } catch (refreshError) {
@@ -50,8 +54,17 @@ axios.interceptors.response.use(
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Make setToken available globally for axios interceptor
+  useEffect(() => {
+    window._authContext = { setToken };
+    return () => {
+      delete window._authContext;
+    };
+  }, []);
 
   useEffect(() => {
     const initAuth = async () => {
@@ -62,8 +75,12 @@ export const AuthProvider = ({ children }) => {
         if (savedUser && accessToken) {
           try {
             // Verify token is still valid
-            const response = await axios.get('/api/auth/verify');
+            const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+            const response = await axios.get(`${API_URL}/api/auth/verify`, {
+              headers: { Authorization: `Bearer ${accessToken}` }
+            });
             setUser(response.data.user);
+            setToken(accessToken);
           } catch (error) {
             // Token is invalid, clear storage
             await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
@@ -82,7 +99,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (username, email, password) => {
     try {
       setError(null);
-      const response = await axios.post('/api/auth/register', {
+      const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+      const response = await axios.post(`${API_URL}/api/auth/register`, {
         username,
         email,
         password,
@@ -97,6 +115,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('user', JSON.stringify(user));
       
       setUser(user);
+      setToken(accessToken);
       return { success: true };
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Registration failed';
@@ -108,7 +127,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (username, password) => {
     try {
       setError(null);
-      const response = await axios.post('/api/auth/login', {
+      const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+      const response = await axios.post(`${API_URL}/api/auth/login`, {
         username,
         password,
         platform: 'mobile'
@@ -122,6 +142,7 @@ export const AuthProvider = ({ children }) => {
       await AsyncStorage.setItem('user', JSON.stringify(user));
       
       setUser(user);
+      setToken(accessToken);
       return { success: true };
     } catch (error) {
       const errorMessage = error.response?.data?.error || 'Login failed';
@@ -134,7 +155,8 @@ export const AuthProvider = ({ children }) => {
     try {
       const refreshToken = await AsyncStorage.getItem('refreshToken');
       if (refreshToken) {
-        await axios.post('/api/auth/logout', { refreshToken });
+        const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+        await axios.post(`${API_URL}/api/auth/logout`, { refreshToken });
       }
     } catch (error) {
       console.error('Logout error:', error);
@@ -142,13 +164,18 @@ export const AuthProvider = ({ children }) => {
       // Clear AsyncStorage and state
       await AsyncStorage.multiRemove(['accessToken', 'refreshToken', 'user']);
       setUser(null);
+      setToken(null);
     }
   };
 
   const updateProfile = async (updates) => {
     try {
       setError(null);
-      const response = await axios.put('/api/users/profile', updates);
+      const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+      const currentToken = await AsyncStorage.getItem('accessToken');
+      const response = await axios.put(`${API_URL}/api/users/profile`, updates, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      });
       const { user } = response.data;
       
       // Update AsyncStorage
@@ -165,7 +192,11 @@ export const AuthProvider = ({ children }) => {
 
   const getStats = async () => {
     try {
-      const response = await axios.get('/api/users/stats');
+      const API_URL = __DEV__ ? 'https://twopwordle-server.onrender.com' : 'https://twopwordle-server.onrender.com';
+      const currentToken = await AsyncStorage.getItem('accessToken');
+      const response = await axios.get(`${API_URL}/api/users/stats`, {
+        headers: { Authorization: `Bearer ${currentToken}` }
+      });
       return response.data.stats;
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -182,7 +213,8 @@ export const AuthProvider = ({ children }) => {
     logout,
     updateProfile,
     getStats,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    token
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

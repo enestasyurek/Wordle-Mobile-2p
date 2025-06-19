@@ -155,6 +155,14 @@ export default function HomeScreen() {
                   </TouchableOpacity>
                   
                   <View style={styles.rightButtons}>
+                    <TouchableOpacity
+                      style={styles.topButton}
+                      onPress={() => navigation.navigate('Friends')}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="people-outline" size={24} color={COLORS.primary} />
+                    </TouchableOpacity>
+                    
                     {isAuthenticated ? (
                       <TouchableOpacity
                         style={styles.topButton}

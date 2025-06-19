@@ -26,10 +26,13 @@ import GameScreen from './src/screens/GameScreen';
 import GameOverScreen from './src/screens/GameOverScreen';
 import HowToPlayScreen from './src/screens/HowToPlayScreen';
 import SettingsScreen from './src/screens/SettingsScreen';
+import FriendsScreen from './src/screens/FriendsScreen';
+import LeaderboardScreen from './src/screens/LeaderboardScreen';
 
 // Components
 import SocketEventHandler from './src/components/SocketEventHandler';
 import ConnectionStatus from './src/components/ConnectionStatus';
+import GameInviteNotification from './src/components/GameInviteNotification';
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -58,6 +61,8 @@ function AppNavigator() {
       <Stack.Screen name="GameOver" component={GameOverScreen} />
       <Stack.Screen name="HowToPlay" component={HowToPlayScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
+      <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="Leaderboard" component={LeaderboardScreen} />
     </Stack.Navigator>
   );
 }
@@ -107,6 +112,7 @@ export default function App() {
                   <AppNavigator />
                   <SocketEventHandler />
                   <ConnectionStatus />
+                  <GameInviteNotification />
                 </NavigationContainer>
               </GameProvider>
             </SocketProvider>
